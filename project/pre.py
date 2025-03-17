@@ -10,10 +10,6 @@ planes.info()
 # 시각화 종류 최소 3개
 
 
-flights = flights.dropna()
-del planes['speed']
-planes = planes.dropna()
-df
 
 df = pd.merge(flights,planes,on='tailnum',how='inner')
 df.drop(columns=['sched_dep_time','time_hour'])
