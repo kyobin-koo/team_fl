@@ -1,0 +1,35 @@
+/* 제목(title)과 부제목(subtitle) 간격 조절 */
+.reveal .title {
+    margin-bottom: 60px !important;  /* 제목과 아래 간격 */
+}
+
+/* 부제목(subtitle)과 아래 본문 간격 */
+.reveal .subtitle {
+    margin-top: 20px !important;
+    margin-bottom: 40px !important;  /* 부제목과 아래 간격 */
+}
+
+.reveal .title {
+    font-size: 90px !important;  /* 제목 크기 */
+    font-weight: bold;
+}
+
+
+.reveal .subtitle {
+    font-size: 64px !important;  /* 부제목 크기 */
+    color: #cccccce6;  /* 부제목 색상 (연한 회색) */
+}
+
+
+.reveal .author p{
+    font-size: 8px !important;  
+    color: rgba(204, 204, 204, 0.9);
+}
+
+
+
+.reveal .footer p{
+    font-size: 12px !important;  
+    display: inline;
+    background-color: rgba(204, 204, 204, 0.9);
+}
