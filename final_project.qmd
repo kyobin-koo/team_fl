@@ -1,7 +1,7 @@
 ---
 title: '`뉴욕 비행장` <br> 데이터 분석'
 title-slide-attributes: 
-    data-background-image: newyork
+    data-background-image: airport.jpg
     data-background-size: cover
     data-background-opacity: '0.3'  
 author: '8조 구교빈, 김예원, 김윤희, 남원정'
@@ -107,7 +107,7 @@ print(planes.isna().sum())
 
 ```{python}
 #| echo : true
-del planes['speed']
+#del planes['speed']
 
 #flights 결측치 전부 제거 
 f = flights.dropna()
@@ -162,7 +162,7 @@ df[['dep_delay','arr_delay','air_time','distance']].describe().round(2)
 
 ::: incremental
 - 출발 지연은 도착 지연의 선행 요인이 될 수 있기에 연쇄 지연을 예방할 수 있다.
-- 소비자 입장에서 출발 지연 정도는 항공편 선택에 있어 중요한 기준이 된다.
+- 소비자 입장에서 출발 지연 정도는 항공편 선택에 있어 중요한 기준이 된다
 :::
 
 # 데이터 후처리
@@ -370,7 +370,7 @@ delay_over_180_count_merge = pd.merge(delay_over_180_count,df_count,on='carrier'
 ---
 
 * step 2) 각 항공사의 지연 시간 빈도수 계산
-    - 비율(ratio) = 각 항공사 출발 지연 시간 횟수 / 항공사의 전체 운항 횟수 
+    - 비율(ratio) = 각 항공사 출발 지연 시간 횟수 / 전체 빈도 수 
     - 3시간 기준으로 이상 이하를 나눠서 진행
         -> over_180_df 와 under_180_df
 
@@ -411,13 +411,13 @@ over_180_df = over_180_df.fillna(0)
 
 ```
 
----   
+---
 
 ```{python}
 print(over_180_df)
 ```
 
----
+---         
 
 
 - 이와 같은 과정을 3시간 이하 지연된 데이터 동일 진행.
@@ -446,6 +446,7 @@ print(under_180_df)
 ```
 
 
+
 ```{python}
 #| echo: False
 ### 3시간 이하 지연된 항공사들 데이터 필터링
@@ -466,6 +467,11 @@ ratio_under_180.sort_values('ratio',ascending=False)
 
 under_180_df = pd.merge(ratio_under_180,delay_under_180.groupby('carrier')['dep_delay'].mean(),on='carrier',how='outer')
 
+```
+
+---
+
+```{python}
 print(under_180_df)
 ```
 
@@ -473,12 +479,11 @@ print(under_180_df)
 
 * step 3) 가중치 부여하기
     - step 2에서 필터링 진행한 데이터들에 가중치 부여
-    - ratio와 dep_delay의 Min_Max를 찾아 정규화 진행
+    - ratio와 minmax_ratio의 Min_Max를 찾아 표준화 진행
 
     
 ```{.python code-line-numbers="|4|5|6|10|12|14|15"}
 #| echo: True
-#| results: show
 
 ### step 2에서 필터링 진행한 데이터들 병합
 merged_df = pd.concat([over_180_df,under_180_df], axis=0).reset_index(drop=True)
@@ -486,9 +491,9 @@ merged_df['minmax_ratio'] = (merged_df['ratio'] - merged_df['ratio'].min()) / (m
 merged_df['minmax_dep_delay'] = (merged_df['dep_delay'] - merged_df['dep_delay'].min()) / (merged_df['dep_delay'].max() - merged_df['dep_delay'].min())
 
 ### ratio와 minmax_ratio의 Min_Max를 찾아 표준화 진행
-#전체 ratio 중에서 가장 큰 값 0.52/작은값은 0
+#전체 ratio 중에서 가장 큰 값/작은값은 0
 over_180_df['minmax_ratio'] = (over_180_df['ratio'])/0.524012 
-#전체 dep_delay중에서 가장 큰 값 743.5/작은값은 0
+#전체 dep_delay중에서 가장 큰 값/작은값은 0
 over_180_df['minmax_dep_delay'] = (over_180_df['dep_delay'])/743.5  
 
 under_180_df['minmax_ratio'] = (under_180_df['ratio'])/0.524012
@@ -536,6 +541,8 @@ weight_total_score = ((over_180_df['minmax_ratio'] * 0.3 + over_180_df['minmax_d
 
 ### 가중치를 적용한 최종 데이터
 weight_total_score_df = pd.concat([over_180_df['carrier'], weight_total_score], axis=1).sort_values(0,ascending=False)
+
+print(weight_total_score_df)
 ```
 
 ------------------------------------------------------------------------
@@ -551,7 +558,7 @@ weight_total_score_df = pd.concat([over_180_df['carrier'], weight_total_score], 
 
 ------------------------------------------------------------------------
 
-## top4 특징 설명 {.scrollable}
+## top4 특징 설명
 
 ### 거리와 출발지연시간의 산점도 {.scrollable}
 
@@ -567,6 +574,8 @@ plt.grid()
 plt.show()
 
 ```
+
+---
 
 ```{python}
 #| echo: false
@@ -599,6 +608,7 @@ selected_carriers = ['HA', 'FL', 'WN', 'F9']
 # 선택된 항공사만 필터링하여 월별 출발 지연 횟수 계산
 carrier_monthly_counts = df[(df['carrier'].isin(selected_carriers)) & (df['dep_delay'] > 0)] \
     .groupby(['month', 'carrier'])['dep_delay'].count().unstack()
+
 
 
 # Seaborn 그룹화된 막대그래프
@@ -889,4 +899,3 @@ weight_total_score_df.style.apply(highlight_rank, axis=1)
 :::
 ![](./airport2.jpg)
 :::
-
